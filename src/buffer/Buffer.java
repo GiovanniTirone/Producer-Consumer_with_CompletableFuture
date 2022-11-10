@@ -1,3 +1,5 @@
+package buffer;
+
 import java.util.ArrayList;
 
 public class Buffer extends ArrayList<Integer> {
@@ -17,5 +19,17 @@ public class Buffer extends ArrayList<Integer> {
         if(this.size()>0) return this.remove(this.size());
         else throw new Exception("Cannot remove elements from an empty buffer.");
     }
+
+    public boolean checkFull () {
+        if(this.size() == maxCapacity) return true;
+        else return false;
+    }
+
+    public boolean checkEmpty () {
+        if(this.size() == 0) return true;
+        else return false;
+    }
+
+
 
 }
