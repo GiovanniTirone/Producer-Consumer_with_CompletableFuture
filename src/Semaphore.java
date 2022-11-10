@@ -1,53 +1,67 @@
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
+
 
 public class Semaphore {
+
     final private int maxInts;
 
-    private int currentPos;
+    private int currentInt;
 
-    public CompletableFuture<Void> wait ;
+    private Runnable wait;
 
-    public CompletableFuture <Void> signal;
+    private Runnable signal;
 
-    public Semaphore(int maxInts,int initialPos){
+    public Semaphore(int maxInts, int initialPos){
         this.maxInts = maxInts;
-        this.currentPos = initialPos;
-
-        this.wait = CompletableFuture.runAsync(() -> {
-            if(currentPos >0) currentPos -=1;
-        });
-
-        this.signal = CompletableFuture.runAsync(() -> {
-            if(currentPos<maxInts) currentPos +=1;
-        });
-
+        this.currentInt = initialPos;
+        this.wait = () -> {
+            try {
+                decreaseCurrentInt();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        this.signal = () -> increaseCurrentInt();
     }
 
     public int getMaxInts() {
         return maxInts;
     }
 
-    public int getCurrentPos() {
-        return currentPos;
+    public int getCurrentInt() {
+        return currentInt;
     }
 
-    public void setCurrentPos(int currentPos) {
-        this.currentPos = currentPos;
+    public void setCurrentInt(int currentInt) {
+        this.currentInt = currentInt;
     }
 
-    public CompletableFuture<Void> getWait() {
+    private void decreaseCurrentInt () throws InterruptedException {
+        System.out.println("decrease current int");
+        while(currentInt<=0) Thread.sleep(2000);
+        if (currentInt > 0) currentInt -= 1;
+    };
+
+    private void increaseCurrentInt () {
+        System.out.println("increase current int");
+        if(currentInt < maxInts-1) currentInt +=1;
+    };
+
+    public Runnable getWait() {
         return wait;
     }
 
-    public void setWait(CompletableFuture<Void> wait) {
+    public void setWait(Runnable wait) {
         this.wait = wait;
     }
 
-    public CompletableFuture<Void> getSignal() {
+    public Runnable getSignal() {
         return signal;
     }
 
-    public void setSignal(CompletableFuture<Void> signal) {
+    public void setSignal(Runnable signal) {
         this.signal = signal;
     }
 }
