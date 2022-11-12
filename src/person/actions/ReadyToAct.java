@@ -1,6 +1,4 @@
 package person.actions;
-import java.util.function.Function;
-
 public class ReadyToAct implements Runnable {
 
     boolean randomWaiting;
@@ -12,8 +10,10 @@ public class ReadyToAct implements Runnable {
         this.stepTime = stepTime;
     }
 
+
     @Override
-    public Object apply(Object o) {
+    public void run() {
+        System.out.println("------------RUN READY TO ACT--------------");
         if(randomWaiting) {
             try {
                 Thread.sleep((int)Math.floor(Math.random())*10000);
@@ -28,16 +28,5 @@ public class ReadyToAct implements Runnable {
                 throw new RuntimeException(e);
             }
         }
-        return null;
-    }
-
-    @Override
-    public Function andThen(Function after) {
-        return Function.super.andThen(after);
-    }
-
-    @Override
-    public Function compose(Function before) {
-        return Function.super.compose(before);
     }
 }

@@ -1,52 +1,42 @@
 package person;
-
 import buffer.Buffer;
 import lombok.Data;
 import person.actions.ReadyToAct;
-import person.actions.RunActionOnBuffer;
+import person.actions.ActOnBufferRunnable;
+import person.actions.Signal;
+import person.actions.Wait;
 import semaphores.Semaphore;
-import java.util.Map;
-import java.util.function.Function;
 
 @Data
-public class Person {
+public abstract class Person {
 
-    protected Function <Semaphore,Void> wait;
-
-    protected Function <Semaphore,Void> signal;
-
-    protected ReadyToAct readyToAct;
-
-    protected Map<Buffer, RunActionOnBuffer> runActionsOnBuffersMap;
-
+    public ReadyToAct readyToActRunnable;
 
     public Person (boolean randomWaiting, int waitingStepTime) {
-
-        this.wait = (Semaphore s) -> {
-            try {
-                while(s.getCurrentInt()<=0) Thread.sleep(1000);
-                s.increaseCurrentInt();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return null;
-        };
-
-        this.signal = (Semaphore s) -> {
-            try {
-                s.increaseCurrentInt();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            return null;
-        };
-
-        this.readyToAct = new ReadyToAct(randomWaiting,waitingStepTime);
-
+        this.readyToActRunnable = new ReadyToAct(randomWaiting,waitingStepTime);
     }
 
+    public Runnable wait (Semaphore semaphore)  {
+        System.out.println(this.getClass().getName() + " wait the semaphore " + semaphore);
+        return new Wait(semaphore);
+    }
 
+    public Runnable signal (Semaphore semaphore){
+        System.out.println(this.getClass().getName() + " signal the semaphore " + semaphore);
+        return new Signal(semaphore);
+    }
 
+    public Runnable actOnBuffer (Buffer buffer) {
+        System.out.println(this.getClass().getName() + " acts on buffer " + buffer);
+        return new ActOnBufferRunnable(buffer) {
+            @Override
+            public void action(Buffer buffer) {
+                actionOnBuffer(buffer);
+            }
+        };
+    }
+
+    abstract void actionOnBuffer (Buffer buffer) ;
 
 
 }

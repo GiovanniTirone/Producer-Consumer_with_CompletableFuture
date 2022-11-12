@@ -3,13 +3,15 @@ package semaphores;
 
 public class Semaphore {
 
+    private String name;
     final private int maxInts;
 
     private int currentInt;
 
 
 
-    public Semaphore(int maxInts, int initialPos){
+    public Semaphore(String name, int maxInts, int initialPos){
+        this.name = name;
         this.maxInts = maxInts;
         this.currentInt = initialPos;
     }
@@ -35,8 +37,13 @@ public class Semaphore {
     public void increaseCurrentInt () throws Exception {
         System.out.println("increase current int");
         if(currentInt >= maxInts) throw new Exception("The current int must be < maxInts");
-        if(currentInt < maxInts-1) currentInt +=1;
+        if(currentInt < maxInts) currentInt +=1;
     };
 
-
+    @Override
+    public String toString() {
+        return " Semaphore: " + name +
+                " - maxInts: " + maxInts +
+                " - currentInt=" + currentInt ;
+    }
 }
