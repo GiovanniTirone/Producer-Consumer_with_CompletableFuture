@@ -16,18 +16,23 @@ public abstract class Person {
         this.readyToActRunnable = new ReadyToAct(randomWaiting,waitingStepTime);
     }
 
+    public Runnable readyToAct () {
+        System.out.println(this.getClass().getName().substring(7).toUpperCase() + " is ready to act");
+        return readyToActRunnable;
+    }
+
     public Runnable wait (Semaphore semaphore)  {
-        System.out.println(this.getClass().getName() + " wait the semaphore " + semaphore);
+        System.out.println(this.getClass().getName().substring(7).toUpperCase() + " wait the semaphore " + semaphore);
         return new Wait(semaphore);
     }
 
     public Runnable signal (Semaphore semaphore){
-        System.out.println(this.getClass().getName() + " signal the semaphore " + semaphore);
+        System.out.println(this.getClass().getName().substring(7).toUpperCase() + " signal the semaphore " + semaphore);
         return new Signal(semaphore);
     }
 
     public Runnable actOnBuffer (Buffer buffer) {
-        System.out.println(this.getClass().getName() + " acts on buffer " + buffer);
+        System.out.println(this.getClass().getName().substring(7).toUpperCase() + " acts on buffer " + buffer);
         return new ActOnBufferRunnable(buffer) {
             @Override
             public void action(Buffer buffer) {

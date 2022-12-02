@@ -6,6 +6,7 @@ import person.Producer;
 import semaphores.Semaphore;
 import java.util.concurrent.CompletableFuture;
 
+
 public class TestProducerConsumer {
     public static void main(String[] args) throws InterruptedException {
         int maxInts = 5;
@@ -15,22 +16,54 @@ public class TestProducerConsumer {
         Semaphore full = new Semaphore("full",maxInts, 0);
         Semaphore mutex = new Semaphore("mutex",1, 1);
         Producer producer = new Producer(false,1000);
-        Consumer consumer = new Consumer(false,50000);
+        Consumer consumer = new Consumer(false,2000);
 
-        CompletableFuture startProducerFuture = CompletableFuture.runAsync(()-> System.out.println("----------Start producer future--------"));
-        CompletableFuture startConsumerFuture = CompletableFuture.runAsync(()-> System.out.println("----------Start consumer future--------"));
+
         CompletableFuture commonFuture = CompletableFuture.runAsync(()-> System.out.println("-------------------Start common future-----------------"));
 
 
+        Thread producerThread = new Thread(() -> {
             while (true) {
-                commonFuture.thenRunAsync(consumer.readyToActRunnable)
+                commonFuture.thenRun(producer.readyToAct())
+                        .thenRun(producer.wait(empty))
+                        .thenRun(producer.wait(mutex))
+                        .thenRun(producer.actOnBuffer(buffer))
+                        .thenRun(producer.signal(mutex))
+                        .thenRun(producer.signal(full));
+            }
+        });
+
+
+        Thread consumerThread = new Thread(()->{
+            while(true){
+                commonFuture.thenRun(consumer.readyToAct())
+                        .thenRun(consumer.wait(full))
+                        .thenRun(consumer.wait(mutex))
+                        .thenRun(consumer.actOnBuffer(buffer))  //non toglie il dato dal buffer peche???
+                        .thenRun(consumer.signal(mutex))
+                        .thenRun(consumer.signal(empty));
+            }
+        });
+
+
+
+        producerThread.start();
+        consumerThread.start();
+
+
+
+
+        /*   THIS DOESN'T WORK
+
+            while (true) {
+                commonFuture.thenRun(consumer.readyToAct())
                         .thenRun(consumer.wait(full))
                         .thenRun(consumer.wait(mutex))
                         .thenRun(consumer.actOnBuffer(buffer))  //non toglie il dato dal buffer peche???
                         .thenRun(consumer.signal(mutex));
 
 
-                commonFuture.thenRun(producer.readyToActRunnable)
+                commonFuture.thenRun(producer.readyToAct())
                         .thenRun(producer.wait(empty))
                         .thenRun(producer.wait(mutex))
                         .thenRun(producer.actOnBuffer(buffer))
@@ -38,7 +71,7 @@ public class TestProducerConsumer {
                         .thenRun(producer.signal(full));
             }
 
-
+        */
     }
 
 
